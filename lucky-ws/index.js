@@ -1,5 +1,13 @@
 import express from "express";
 import cors from "cors";
+
+
+// Fuerza a resolver primero IPv4 (evita que use AAAA/IPv6)
+import { setDefaultResultOrder } from 'node:dns';
+setDefaultResultOrder('ipv4first');
+
+
+
 import { pool, pingDB } from "./db.js";
 
 const app = express();
