@@ -5,7 +5,7 @@ const {
   DB_PORT = "5432",
   DB_NAME = "postgres",
   DB_USER = "postgres",
-  DB_PASSWORD = "ytOGuvXQXhr1u94P",
+  DB_PASSWORD,
 } = process.env;
 
 export const pool = new Pool({
