@@ -1,16 +1,20 @@
-// db.js (ESM)
 import { Pool } from "pg";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  console.error("[DB] Falta DATABASE_URL en las env de Render");
-  throw new Error("DATABASE_URL not set");
-}
-console.log("[DB] Using DATABASE_URL host:", new URL(connectionString).host);
+const {
+  DB_HOST = "db.atikgycpnvdqlxdmozqf.supabase.co",
+  DB_PORT = "5432",
+  DB_NAME = "postgres",
+  DB_USER = "postgres",
+  DB_PASSWORD = "ytOGuvXQXhr1u94P",
+} = process.env;
 
 export const pool = new Pool({
-  connectionString,
-  ssl: { rejectUnauthorized: false } // necesario en Supabase (pooler)
+  host: DB_HOST,
+  port: Number(DB_PORT),
+  database: DB_NAME,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  ssl: { rejectUnauthorized: false },
 });
 
 export async function pingDB() {
