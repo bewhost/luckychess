@@ -1,12 +1,7 @@
 import express from "express";
 import cors from "cors";
-
-
-// Fuerza a resolver primero IPv4 (evita que use AAAA/IPv6)
-import { setDefaultResultOrder } from 'node:dns';
-setDefaultResultOrder('ipv4first');
-
-
+import { setDefaultResultOrder } from "node:dns";
+setDefaultResultOrder("ipv4first"); // evita IPv6
 
 import { pool, pingDB } from "./db.js";
 
@@ -14,25 +9,33 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Puerto asignado por Render
 const PORT = process.env.PORT || 8080;
 
-// Health
 app.get("/health", (req, res) => res.json({ ok: true }));
 
-// Comprobar conexión a DB
+// DEBUG: ver qué vars está usando el contenedor
+app.get("/db-debug", (req, res) => {
+  res.json({
+    host: process.env.DB_HOST || "db.atikgycpnvdqlxdmozqf.supabase.co",
+    port: process.env.DB_PORT || "5432",
+    user: process.env.DB_USER || "postgres",
+    hasPassword: Boolean(process.env.DB_PASSWORD),
+    ipv4first: true,
+    node: process.version,
+  });
+});
+
 app.get("/db-time", async (req, res) => {
   try {
     const t = await pingDB();
     res.json({ ok: true, time: t.now });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ ok: false, error: e.message });
+    console.error("db-time error:", e);
+    res.status(500).json({ ok: false, error: e.message || String(e) });
   }
 });
 
-// Ejemplo: lista de partidas (ajustá al nombre real de tu tabla)
-app.get("/games", async (req, res) => {
+app.get("/games", async (_req, res) => {
   try {
     const { rows } = await pool.query("select * from games order by id desc limit 50");
     res.json(rows);
@@ -41,7 +44,6 @@ app.get("/games", async (req, res) => {
   }
 });
 
-// Ejemplo: crear partida (ajustá columnas)
 app.post("/games", async (req, res) => {
   try {
     const { player_white, player_black } = req.body;
@@ -55,6 +57,4 @@ app.post("/games", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`WS up on :${PORT}`);
-});
+app.listen(PORT, () => console.log(`WS up on :${PORT}`));
